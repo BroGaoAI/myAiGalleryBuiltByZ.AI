@@ -1,0 +1,42 @@
+const generateImage = async () => {
+    console.log('generateImage function called');
+    if (!prompt.trim()) {
+      alert('请输入提示词');
+      return;
+    }
+
+    console.log('Starting image generation with prompt:', prompt);
+    setIsGenerating(true);
+    setGeneratedImage(null);
+    try {
+      const response = await fetch('/api/generate-volcengine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          category,
+          style,
+          width: 1024,
+          height: 1024
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // 显示生成的图像
+        setGeneratedImage(data.data.imageUrl);
+        // 刷新作品列表
+        await fetchArtworks();
+        setPrompt('');
+        alert('🎨 图像生成成功！使用火山引擎 doubao-seedream-4.0 模型');
+      } else {
+        const error = await response.json();
+        alert(`生成失败: ${error.error || '未知错误'}`);
+      }
+    } catch (error) {
+      console.error('Failed to generate image:', error);
+      alert('生成失败，请重试');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
